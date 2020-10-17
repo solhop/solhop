@@ -1,0 +1,6 @@
+[submodule "rsat"]
+	path = rsat
+	url = ../rsat.git
+[submodule "msat"]
+	path = msat
+	url = ../msat.git
