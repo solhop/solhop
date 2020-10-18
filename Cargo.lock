@@ -179,9 +179,10 @@ dependencies = [
 
 [[package]]
 name = "msat"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "rsat",
+ "solhop-types",
 ]
 
 [[package]]
@@ -328,7 +329,7 @@ checksum = "8cab7a364d15cde1e505267766a2d3c4e22a843e1a601f0fa7564c0f82ced11c"
 
 [[package]]
 name = "rsat"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "rand",
  "rayon",

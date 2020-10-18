@@ -35,7 +35,11 @@ enum Opt {
     },
     /// MaxSAT Solver (Not yet implemented)
     #[structopt(setting=structopt::clap::AppSettings::ColoredHelp)]
-    Msat {},
+    Msat {
+        /// Input file in DIMACS format
+        #[structopt(parse(from_os_str))]
+        file: PathBuf,
+    },
 }
 
 // Function to write drat clauses to file
@@ -152,8 +156,31 @@ fn main() {
                 }
             }
         }
-        Opt::Msat { .. } => {
-            todo!("msat");
+        Opt::Msat { file, .. } => {
+            let dimacs = parse_dimacs_from_file(&file);
+            let (solution, optimum) = msat::solve(dimacs);
+            match solution {
+                Solution::Unsat => println!("s UNSATISFIABLE"),
+                Solution::Unknown => println!("s UNKNOWN"),
+                Solution::Best(solution) => {
+                    println!("o {}", optimum);
+                    let solution = solution.iter().map(|&x| if x { 1 } else { -1 });
+                    print!("v ");
+                    for (i, v) in solution.enumerate() {
+                        print!("{} ", v * ((i + 1) as i32));
+                    }
+                    println!("0");
+                }
+                Solution::Sat(solution) => {
+                    println!("o {}", optimum);
+                    let solution = solution.iter().map(|&x| if x { 1 } else { -1 });
+                    print!("v ");
+                    for (i, v) in solution.enumerate() {
+                        print!("{} ", v * ((i + 1) as i32));
+                    }
+                    println!("0");
+                }
+            }
         }
     }
 }

@@ -25,8 +25,8 @@ members = ["rsat", "msat", "solhop-types"]
 
 [dependencies]
 solhop-types = "=0.1.0"
-rsat = "=0.1.11"
-msat = "=0.1.0"
+rsat = "=0.1.12"
+msat = "=0.1.1"
 structopt = "0.3"
 
 [patch.crates-io]
