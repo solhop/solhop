@@ -1,6 +1,6 @@
 [submodule "rsat"]
 	path = rsat
-	url = ../rsat.git
+	url = https://github.com/solhop/rsat.git
 [submodule "msat"]
 	path = msat
-	url = ../msat.git
+	url = https://github.com/solhop/msat.git

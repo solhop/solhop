@@ -181,7 +181,7 @@ dependencies = [
 name = "msat"
 version = "0.1.0"
 dependencies = [
- "rsat",
+ "rsat 0.1.11 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -337,6 +337,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "rsat"
+version = "0.1.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b85a4411c00af5b7073f4343840841eff267587c297d59f4ea41d615fce0c5a8"
+dependencies = [
+ "rand",
+ "rayon",
+ "regex",
+ "structopt",
+]
+
+[[package]]
 name = "scopeguard"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -347,7 +359,7 @@ name = "solhop"
 version = "0.1.0"
 dependencies = [
  "msat",
- "rsat",
+ "rsat 0.1.11",
  "structopt",
 ]
 
