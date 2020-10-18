@@ -4,3 +4,6 @@
 [submodule "msat"]
 	path = msat
 	url = https://github.com/solhop/msat.git
+[submodule "solhop-types"]
+	path = solhop-types
+	url = https://github.com/solhop/solhop-types.git

@@ -1,7 +1,8 @@
 use rsat::cdcl;
-use rsat::common::{Solution, Var};
+use rsat::cdcl::DratClause;
+use solhop_types::dimacs::{parse_dimacs_from_file, Dimacs};
+use solhop_types::{Solution, Var};
 use std::fs::File;
-use std::io;
 use std::io::Write;
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -37,44 +38,30 @@ enum Opt {
     Msat {},
 }
 
-fn parse_from_file(filename: &str) -> (usize, Vec<Vec<i32>>) {
-    let file = File::open(filename).expect("File not found");
-    let mut reader = io::BufReader::new(file);
-    let parsed = rsat::parser::parse_dimacs_from_buf_reader(&mut reader);
-    if let rsat::parser::Dimacs::Cnf { n_vars, clauses } = parsed {
-        (n_vars, clauses)
-    } else {
-        panic!("Incorrect input format");
-    }
-}
-
 // Function to write drat clauses to file
-fn write_drat_clauses(drat: Option<File>, solver: rsat::cdcl::Solver) {
-    use cdcl::DratClause;
-    if let Some(mut drat_file) = drat {
-        if let Some(drat_clauses) = solver.drat_clauses() {
-            for drat_clause in drat_clauses {
-                let (is_delete, lits) = match drat_clause {
-                    DratClause::Add(lits) => (false, lits),
-                    DratClause::Delete(lits) => (true, lits),
-                };
-                if is_delete {
-                    write!(drat_file, "d ").unwrap();
-                }
-                for lit in lits.iter() {
-                    write!(
-                        drat_file,
-                        "{} ",
-                        if lit.sign() {
-                            -(lit.var().index() as i32 + 1)
-                        } else {
-                            lit.var().index() as i32 + 1
-                        }
-                    )
-                    .unwrap();
-                }
-                writeln!(drat_file, "0").unwrap();
+pub fn write_drat_clauses(drat_file: &mut File, solver: rsat::cdcl::Solver) {
+    if let Some(drat_clauses) = solver.drat_clauses() {
+        for drat_clause in drat_clauses {
+            let (is_delete, lits) = match drat_clause {
+                DratClause::Add(lits) => (false, lits),
+                DratClause::Delete(lits) => (true, lits),
+            };
+            if is_delete {
+                write!(drat_file, "d ").unwrap();
             }
+            for lit in lits.iter() {
+                write!(
+                    drat_file,
+                    "{} ",
+                    if lit.sign() {
+                        -(lit.var().index() as i32 + 1)
+                    } else {
+                        lit.var().index() as i32 + 1
+                    }
+                )
+                .unwrap();
+            }
+            writeln!(drat_file, "0").unwrap();
         }
     }
 }
@@ -92,7 +79,12 @@ fn main() {
             max_flips,
             ..
         } => {
-            let (n_vars, clauses) = parse_from_file(file.to_str().unwrap());
+            let (n_vars, clauses) =
+                if let Dimacs::Cnf { n_vars, clauses } = parse_dimacs_from_file(&file) {
+                    (n_vars, clauses)
+                } else {
+                    panic!("Incorrect input format");
+                };
 
             let solution = match alg {
                 1 => {
@@ -107,7 +99,7 @@ fn main() {
                     //     var_inc: 1.0,
                     //     var_decay: 0.95,
                     // };
-                    let drat = match drat {
+                    let mut drat = match drat {
                         Some(drat) => Some(File::create(drat).expect("Drat file not found")),
                         None => None,
                     };
@@ -116,27 +108,18 @@ fn main() {
                     }
                     let mut solver = Solver::new(options);
 
-                    let vars: Vec<Var> = (0..n_vars).map(|_| solver.new_var()).collect();
+                    let _vars: Vec<Var> = (0..n_vars).map(|_| solver.new_var()).collect();
 
                     for clause in clauses {
-                        let lits = clause
-                            .into_iter()
-                            .map(|l| {
-                                let var = vars[(l.abs() - 1) as usize];
-                                if l < 0 {
-                                    var.neg_lit()
-                                } else {
-                                    var.pos_lit()
-                                }
-                            })
-                            .collect();
-                        solver.add_clause(lits);
+                        solver.add_clause(clause);
                     }
 
                     let solution = solver.solve(vec![]);
 
                     if let Solution::Unsat = solution {
-                        write_drat_clauses(drat, solver);
+                        if let Some(drat_file) = &mut drat {
+                            write_drat_clauses(drat_file, solver);
+                        }
                     }
                     solution
                 }

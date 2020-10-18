@@ -2,6 +2,6 @@
 
 TODO
 
----
+## License
 
-LICENSE: [MIT](LICENSE)
+[MIT](LICENSE)
