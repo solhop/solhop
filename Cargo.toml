@@ -7,7 +7,7 @@ description = """
 SAT and MaxSAT Solver
 """
 documentation = "https://docs.rs/solhop/"
-homepage = "https://solhop.org/"
+homepage = "https://solhop.netlify.app/"
 repository = "https://github.com/solhop/solhop"
 readme = "README.md"
 keywords = ["SAT", "MaxSAT", "Boolean", "Satisfiability", "Solver"]
